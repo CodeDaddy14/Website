@@ -4,7 +4,6 @@ import Hero3D from './components/Hero3D';
 import About3D from './components/About3D';
 import Services from './components/Services';
 import Portfolio3D from './components/Portfolio3D';
-import Tech from './components/Tech';
 import Testimonials from './components/Testimonials';
 import InteractiveContact from './components/InteractiveContact';
 import Footer from './components/Footer';
@@ -37,7 +36,6 @@ function App() {
         <About3D />
         <Services />
         <Portfolio3D />
-        <Tech />
         <Testimonials />
         <InteractiveContact />
       </main>
