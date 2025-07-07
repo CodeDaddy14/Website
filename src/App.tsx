@@ -1,44 +1,56 @@
-import React, { useEffect } from 'react';
-import Header from './components/Header';
-import Hero3D from './components/Hero3D';
-import About3D from './components/About3D';
-import Services from './components/Services';
+/**
+ * Main App Component
+ * Root component that orchestrates all sections and global effects
+ */
+
+import React from 'react';
+import { useMouseTracking } from './hooks/useScrollEffect';
+
+// Import all section components
+import Header from './components/common/Header';
+import Hero3D from './components/sections/Hero3D';
+import Services from './components/sections/Services';
+import About3D from './components/sections/About3D';
 import Portfolio3D from './components/Portfolio3D';
 import Testimonials from './components/Testimonials';
 import InteractiveContact from './components/InteractiveContact';
 import Footer from './components/Footer';
 
+/**
+ * Main Application Component
+ * Manages global state and renders all page sections
+ */
 function App() {
-  useEffect(() => {
-    // Mouse tracking for cursor effects
-    const handleMouseMove = (e: MouseEvent) => {
-      const x = (e.clientX / window.innerWidth) * 100;
-      const y = (e.clientY / window.innerHeight) * 100;
-      
-      document.documentElement.style.setProperty('--mouse-x', `${x}%`);
-      document.documentElement.style.setProperty('--mouse-y', `${y}%`);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, []);
+  // Initialize mouse tracking for cursor effects
+  useMouseTracking();
 
   return (
     <div className="min-h-screen">
+      {/* Fixed Header Navigation */}
       <Header />
+      
+      {/* Main Content Sections */}
       <main>
-        <section id="home">
-          <Hero3D />
-        </section>
-        <About3D />
+        {/* Hero Section - Landing page with 3D elements */}
+        <Hero3D />
+        
+        {/* Services Section - Moved before About section */}
         <Services />
+        
+        {/* About Section - Team and company values */}
+        <About3D />
+        
+        {/* Portfolio Section - Project showcase */}
         <Portfolio3D />
+        
+        {/* Testimonials Section - Client feedback */}
         <Testimonials />
+        
+        {/* Contact Section - Contact form and information */}
         <InteractiveContact />
       </main>
+      
+      {/* Footer */}
       <Footer />
     </div>
   );

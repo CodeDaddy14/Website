@@ -1,10 +1,20 @@
+/**
+ * Hero3D Component
+ * Main hero section with 3D elements and floating e-commerce logos
+ */
+
 import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Float, Text3D, OrbitControls, Sphere, MeshDistortMaterial, Environment } from '@react-three/drei';
+import { Float, Sphere, MeshDistortMaterial, Environment, OrbitControls } from '@react-three/drei';
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles, Code, Palette, Brain } from 'lucide-react';
+import { handleNavClick } from '../../utils/scrollUtils';
+import FloatingLogos from '../ui/FloatingLogos';
 import * as THREE from 'three';
 
+/**
+ * Floating Geometry Component for 3D background
+ */
 const FloatingGeometry: React.FC<{ position: [number, number, number]; color: string }> = ({ position, color }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   
@@ -26,6 +36,9 @@ const FloatingGeometry: React.FC<{ position: [number, number, number]; color: st
   );
 };
 
+/**
+ * Animated Sphere Component
+ */
 const AnimatedSphere: React.FC = () => {
   const sphereRef = useRef<THREE.Mesh>(null);
   
@@ -51,6 +64,9 @@ const AnimatedSphere: React.FC = () => {
   );
 };
 
+/**
+ * Particle Field Component
+ */
 const ParticleField: React.FC = () => {
   const points = useRef<THREE.Points>(null);
   
@@ -86,9 +102,12 @@ const ParticleField: React.FC = () => {
   );
 };
 
+/**
+ * Main Hero3D Component
+ */
 const Hero3D: React.FC = () => {
   return (
-    <section className="relative min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 overflow-hidden">
+    <section id="home" className="relative min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 overflow-hidden">
       {/* 3D Canvas Background */}
       <div className="absolute inset-0">
         <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
@@ -107,6 +126,9 @@ const Hero3D: React.FC = () => {
           <OrbitControls enableZoom={false} enablePan={false} enableRotate={true} autoRotate autoRotateSpeed={0.5} />
         </Canvas>
       </div>
+
+      {/* Floating E-commerce Logos */}
+      <FloatingLogos />
 
       {/* Floating Interactive Elements */}
       <motion.div 
@@ -162,6 +184,7 @@ const Hero3D: React.FC = () => {
         </div>
       </motion.div>
 
+      {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center">
           {/* Animated Badge */}
@@ -173,7 +196,7 @@ const Hero3D: React.FC = () => {
             whileHover={{ scale: 1.05 }}
           >
             <Sparkles className="w-4 h-4 text-blue-400 mr-2" />
-            {/* <span className="text-blue-300 text-sm font-medium">Digital Innovation Studio</span> */}
+            <span className="text-blue-300 text-sm font-medium">Digital Innovation Studio</span>
           </motion.div>
 
           {/* Main Heading with 3D Text Effect */}
@@ -229,6 +252,7 @@ const Hero3D: React.FC = () => {
             transition={{ duration: 0.8, delay: 0.6 }}
           >
             <motion.button 
+              onClick={() => handleNavClick('#portfolio')}
               className="group inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-emerald-600 text-white font-semibold rounded-full relative overflow-hidden"
               whileHover={{ 
                 scale: 1.05,
@@ -248,6 +272,7 @@ const Hero3D: React.FC = () => {
             </motion.button>
             
             <motion.button 
+              onClick={() => handleNavClick('#about')}
               className="inline-flex items-center px-8 py-4 border-2 border-white/20 text-white font-semibold rounded-full backdrop-blur-sm relative overflow-hidden"
               whileHover={{ 
                 scale: 1.05,
@@ -311,6 +336,7 @@ const Hero3D: React.FC = () => {
         animate={{ y: [0, 10, 0] }}
         transition={{ duration: 2, repeat: Infinity }}
         whileHover={{ scale: 1.2 }}
+        onClick={() => handleNavClick('#services')}
       >
         <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center relative overflow-hidden">
           <motion.div 

@@ -1,27 +1,25 @@
-import React, { useState, useEffect } from 'react';
+/**
+ * Header Component
+ * Main navigation header with responsive design and scroll effects
+ */
+
+import React, { useState } from 'react';
 import { Menu, X, Sparkles } from 'lucide-react';
+import { useScrolled } from '../../hooks/useScrollEffect';
+import { handleNavClick } from '../../utils/scrollUtils';
+import { NAV_ITEMS } from '../../constants';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const isScrolled = useScrolled(50);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const navItems = [
-    { name: 'Home', href: '#home' },
-    { name: 'About', href: '#about' },
-    { name: 'Services', href: '#services' },
-    { name: 'Portfolio', href: '#portfolio' },
-    { name: 'Testimonials', href: '#testimonials' },
-    { name: 'Contact', href: '#contact' }
-  ];
+  /**
+   * Handles mobile menu item clicks
+   * Closes menu and navigates to section
+   */
+  const handleMobileNavClick = (href: string): void => {
+    handleNavClick(href, () => setIsMenuOpen(false));
+  };
 
   return (
     <header 
@@ -33,7 +31,7 @@ const Header: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
-          {/* Logo */}
+          {/* Logo Section */}
           <div className="flex items-center">
             <div className={`w-10 h-10 rounded-lg flex items-center justify-center mr-3 ${
               isScrolled ? 'bg-gradient-to-r from-blue-600 to-emerald-600' : 'bg-white/20 backdrop-blur-sm'
@@ -49,26 +47,29 @@ const Header: React.FC = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <a
+            {NAV_ITEMS.map((item) => (
+              <button
                 key={item.name}
-                href={item.href}
+                onClick={() => handleNavClick(item.href)}
                 className={`font-medium transition-colors duration-300 hover:text-blue-600 ${
                   isScrolled ? 'text-slate-700' : 'text-white/90 hover:text-white'
                 }`}
               >
                 {item.name}
-              </a>
+              </button>
             ))}
           </nav>
 
           {/* CTA Button */}
           <div className="hidden md:flex items-center space-x-4">
-            <button className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 ${
-              isScrolled 
-                ? 'bg-gradient-to-r from-blue-600 to-emerald-600 text-white hover:shadow-lg hover:shadow-blue-500/25' 
-                : 'bg-white text-slate-900 hover:shadow-lg hover:shadow-white/25'
-            }`}>
+            <button 
+              onClick={() => handleNavClick('#contact')}
+              className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 ${
+                isScrolled 
+                  ? 'bg-gradient-to-r from-blue-600 to-emerald-600 text-white hover:shadow-lg hover:shadow-blue-500/25' 
+                  : 'bg-white text-slate-900 hover:shadow-lg hover:shadow-white/25'
+              }`}
+            >
               Get Started
             </button>
           </div>
@@ -88,18 +89,20 @@ const Header: React.FC = () => {
         {isMenuOpen && (
           <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-2xl border-t border-gray-200">
             <nav className="py-4">
-              {navItems.map((item) => (
-                <a
+              {NAV_ITEMS.map((item) => (
+                <button
                   key={item.name}
-                  href={item.href}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="block px-4 py-3 text-slate-700 hover:bg-gray-50 hover:text-blue-600 transition-colors duration-300"
+                  onClick={() => handleMobileNavClick(item.href)}
+                  className="block w-full text-left px-4 py-3 text-slate-700 hover:bg-gray-50 hover:text-blue-600 transition-colors duration-300"
                 >
                   {item.name}
-                </a>
+                </button>
               ))}
               <div className="px-4 py-3">
-                <button className="w-full bg-gradient-to-r from-blue-600 to-emerald-600 text-white font-semibold py-3 px-6 rounded-full hover:shadow-lg transition-all duration-300">
+                <button 
+                  onClick={() => handleMobileNavClick('#contact')}
+                  className="w-full bg-gradient-to-r from-blue-600 to-emerald-600 text-white font-semibold py-3 px-6 rounded-full hover:shadow-lg transition-all duration-300"
+                >
                   Get Started
                 </button>
               </div>

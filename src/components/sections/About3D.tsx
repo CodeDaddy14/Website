@@ -1,10 +1,19 @@
+/**
+ * About3D Component
+ * Team section with 3D elements and animations
+ */
+
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Float, Text3D, OrbitControls } from '@react-three/drei';
+import { Float, OrbitControls } from '@react-three/drei';
 import { Users, Award, Target, Zap } from 'lucide-react';
+import { TEAM_MEMBERS } from '../../constants';
 import * as THREE from 'three';
 
+/**
+ * 3D Team Member Component
+ */
 const TeamMember3D: React.FC<{ position: [number, number, number]; color: string }> = ({ position, color }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   
@@ -25,6 +34,9 @@ const TeamMember3D: React.FC<{ position: [number, number, number]; color: string
   );
 };
 
+/**
+ * Main About3D Component
+ */
 const About3D: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -34,41 +46,6 @@ const About3D: React.FC = () => {
 
   const y = useTransform(scrollYProgress, [0, 1], [100, -100]);
   const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
-
-  const teamMembers = [
-    {
-      name: "Suvam Jaiswal",
-      role: "Branding & Graphic Design",
-      bio: "Creative visionary with a passion for building memorable brand identities and stunning visual experiences.",
-      skills: ["Brand Identity", "Logo Design", "Print Design", "Creative Direction"],
-      color: "from-pink-500 to-rose-500",
-      meshColor: "#EC4899"
-    },
-    {
-      name: "Chandraprakash Pandey",
-      role: "UI/UX Design",
-      bio: "User-centered designer crafting intuitive interfaces and seamless digital experiences that users love.",
-      skills: ["User Research", "Wireframing", "Prototyping", "Design Systems"],
-      color: "from-blue-500 to-cyan-500",
-      meshColor: "#3B82F6"
-    },
-    {
-      name: "Sumit Jaiswal",
-      role: "CRM Development & PHP",
-      bio: "Full-stack developer specializing in robust backend systems and custom CRM solutions for business growth.",
-      skills: ["PHP", "MySQL", "Laravel", "CRM Systems"],
-      color: "from-emerald-500 to-teal-500",
-      meshColor: "#10B981"
-    },
-    {
-      name: "Aditya Gupta",
-      role: "Data Engineering & AI/ML",
-      bio: "AI enthusiast building intelligent systems and data-driven solutions for the future of technology.",
-      skills: ["Machine Learning", "Data Analysis", "Python", "AI Integration"],
-      color: "from-purple-500 to-indigo-500",
-      meshColor: "#8B5CF6"
-    }
-  ];
 
   const values = [
     {
@@ -137,7 +114,7 @@ const About3D: React.FC = () => {
 
         {/* Team Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
-          {teamMembers.map((member, index) => (
+          {TEAM_MEMBERS.map((member, index) => (
             <motion.div 
               key={index}
               className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 relative overflow-hidden"
