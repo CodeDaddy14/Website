@@ -506,7 +506,7 @@ const InteractiveContact: React.FC = () => {
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                < 24hrs
+                {'< 24hrs'}
               </motion.div>
               <div className="text-slate-300 relative z-10">Average Response Time</div>
               <div className="text-sm text-slate-400 mt-2 relative z-10">We typically respond within a few hours</div>
