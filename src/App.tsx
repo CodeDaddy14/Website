@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { useMouseTracking } from './hooks/useScrollEffect';
+import { useNotifications } from './hooks/useNotifications';
 
 // Import all section components
 import Header from './components/common/Header';
@@ -13,8 +14,9 @@ import Services from './components/sections/Services';
 import About3D from './components/sections/About3D';
 import Portfolio3D from './components/Portfolio3D';
 import Testimonials from './components/Testimonials';
-import InteractiveContact from './components/InteractiveContact';
+import InteractiveContact from './components/sections/InteractiveContact';
 import Footer from './components/Footer';
+import NotificationSystem from './components/ui/NotificationSystem';
 
 /**
  * Main Application Component
@@ -23,6 +25,9 @@ import Footer from './components/Footer';
 function App() {
   // Initialize mouse tracking for cursor effects
   useMouseTracking();
+  
+  // Initialize notification system
+  const { notifications, removeNotification } = useNotifications();
 
   return (
     <div className="min-h-screen">
@@ -52,6 +57,12 @@ function App() {
       
       {/* Footer */}
       <Footer />
+      
+      {/* Global Notification System */}
+      <NotificationSystem 
+        notifications={notifications}
+        onRemove={removeNotification}
+      />
     </div>
   );
 }

@@ -1,14 +1,15 @@
 /**
  * Enhanced Interactive Contact Component
- * Contact form with email integration and meeting scheduler
+ * Contact form with improved email integration and meeting scheduler
  */
 
 import React, { useState, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Sphere, MeshDistortMaterial } from '@react-three/drei';
-import { Mail, Phone, MapPin, Send, MessageCircle, Calendar } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, MessageCircle, Calendar, CheckCircle } from 'lucide-react';
 import { useTimeBasedTheme } from '../../hooks/useTimeBasedTheme';
+import { useNotifications } from '../../hooks/useNotifications';
 import { sendContactForm, ContactFormData } from '../../services/emailService';
 import MeetingScheduler from '../ui/MeetingScheduler';
 import * as THREE from 'three';
@@ -49,6 +50,7 @@ const ContactSphere: React.FC<{ position: [number, number, number]; color: strin
 const InteractiveContact: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const theme = useTimeBasedTheme();
+  const { showSuccess, showError, showWarning } = useNotifications();
   const [isMeetingSchedulerOpen, setIsMeetingSchedulerOpen] = useState(false);
   
   const [formData, setFormData] = useState<ContactFormData>({
@@ -84,6 +86,11 @@ const InteractiveContact: React.FC = () => {
       const success = await sendContactForm(formData);
       if (success) {
         setIsSuccess(true);
+        showSuccess(
+          'Message Sent Successfully!',
+          'Thank you for reaching out. We\'ll get back to you within 24 hours.'
+        );
+        
         // Reset form after 3 seconds
         setTimeout(() => {
           setIsSuccess(false);
@@ -99,6 +106,10 @@ const InteractiveContact: React.FC = () => {
       }
     } catch (error) {
       console.error('Error sending contact form:', error);
+      showError(
+        'Failed to Send Message',
+        'Please try again or contact us directly via email.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -239,7 +250,7 @@ const InteractiveContact: React.FC = () => {
                       value={formData.name}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 bg-slate-700/80 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-300"
-                      style={{ focusRingColor: theme.primary }}
+                      style={{ '--tw-ring-color': theme.primary } as React.CSSProperties}
                       placeholder="John Doe"
                     />
                   </motion.div>
@@ -362,7 +373,7 @@ const InteractiveContact: React.FC = () => {
                 transition={{ duration: 0.5 }}
               >
                 <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Send className="w-10 h-10 text-green-600" />
+                  <CheckCircle className="w-10 h-10 text-green-600" />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-4">Message Sent Successfully!</h3>
                 <p className="text-slate-300">
@@ -419,13 +430,14 @@ const InteractiveContact: React.FC = () => {
             {/* Quick Actions */}
             <div className="space-y-4">
               <motion.div 
-                className="rounded-2xl p-6 text-center relative overflow-hidden"
+                className="rounded-2xl p-6 text-center relative overflow-hidden cursor-pointer"
                 style={{ background: `linear-gradient(to right, ${theme.primary}, ${theme.secondary})` }}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
                 whileHover={{ scale: 1.02 }}
                 viewport={{ once: true }}
+                onClick={() => window.open('mailto:adityakumar2482@gmail.com?subject=Quick Chat Request')}
               >
                 <motion.div
                   animate={{ rotate: [0, 10, -10, 0] }}
@@ -435,25 +447,25 @@ const InteractiveContact: React.FC = () => {
                 </motion.div>
                 <h4 className="text-lg font-bold text-white mb-2">Quick Chat</h4>
                 <p className="text-white/80 text-sm mb-4">Have a quick question? Let's chat!</p>
-                <motion.button 
-                  onClick={() => window.open('mailto:adityakumar2482@gmail.com?subject=Quick Chat Request')}
-                  className="bg-white/20 backdrop-blur-sm text-white font-semibold py-2 px-6 rounded-full border border-white/30"
+                <motion.div 
+                  className="bg-white/20 backdrop-blur-sm text-white font-semibold py-2 px-6 rounded-full border border-white/30 inline-block"
                   whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.3)" }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.2 }}
                 >
                   Start Chat
-                </motion.button>
+                </motion.div>
               </motion.div>
 
               <motion.div 
-                className="rounded-2xl p-6 text-center relative overflow-hidden"
+                className="rounded-2xl p-6 text-center relative overflow-hidden cursor-pointer"
                 style={{ background: `linear-gradient(to right, ${theme.secondary}, ${theme.accent})` }}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
                 whileHover={{ scale: 1.02 }}
                 viewport={{ once: true }}
+                onClick={() => setIsMeetingSchedulerOpen(true)}
               >
                 <motion.div
                   animate={{ scale: [1, 1.1, 1] }}
@@ -463,15 +475,14 @@ const InteractiveContact: React.FC = () => {
                 </motion.div>
                 <h4 className="text-lg font-bold text-white mb-2">Schedule Call</h4>
                 <p className="text-white/80 text-sm mb-4">Book a free 30-minute consultation</p>
-                <motion.button 
-                  onClick={() => setIsMeetingSchedulerOpen(true)}
-                  className="bg-white/20 backdrop-blur-sm text-white font-semibold py-2 px-6 rounded-full border border-white/30"
+                <motion.div 
+                  className="bg-white/20 backdrop-blur-sm text-white font-semibold py-2 px-6 rounded-full border border-white/30 inline-block"
                   whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.3)" }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.2 }}
                 >
                   Book Call
-                </motion.button>
+                </motion.div>
               </motion.div>
             </div>
 
@@ -495,7 +506,7 @@ const InteractiveContact: React.FC = () => {
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                &lt; 24hrs
+                < 24hrs
               </motion.div>
               <div className="text-slate-300 relative z-10">Average Response Time</div>
               <div className="text-sm text-slate-400 mt-2 relative z-10">We typically respond within a few hours</div>

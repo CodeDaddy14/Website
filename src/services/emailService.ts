@@ -1,6 +1,6 @@
 /**
  * Email Service
- * Handles contact form submissions and meeting scheduling
+ * Handles contact form submissions and meeting scheduling via Supabase Edge Functions
  */
 
 export interface ContactFormData {
@@ -21,18 +21,44 @@ export interface MeetingRequest {
   message?: string;
 }
 
-const ADMIN_EMAIL = 'adityakumar2482@gmail.com';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co';
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
 
 /**
- * Sends contact form data via email
+ * Sends contact form data via Supabase Edge Function
  */
 export const sendContactForm = async (formData: ContactFormData): Promise<boolean> => {
   try {
-    // Create email content
-    const subject = `New Contact Form Submission from ${formData.name}`;
-    const body = `
-New contact form submission:
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        type: 'contact',
+        data: formData
+      })
+    });
 
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to send contact form');
+    }
+
+    const result = await response.json();
+    console.log('Contact form sent successfully:', result);
+    
+    // Show success notification
+    showNotification('Message sent successfully! We\'ll get back to you within 24 hours.', 'success');
+    
+    return true;
+  } catch (error) {
+    console.error('Error sending contact form:', error);
+    
+    // Fallback to mailto if edge function fails
+    const subject = `Contact Form Submission from ${formData.name}`;
+    const body = `
 Name: ${formData.name}
 Email: ${formData.email}
 Company: ${formData.company || 'Not provided'}
@@ -41,138 +67,103 @@ Budget: ${formData.budget || 'Not specified'}
 
 Message:
 ${formData.message}
-
----
-Submitted at: ${new Date().toLocaleString()}
     `.trim();
 
-    // Create mailto link
-    const mailtoLink = `mailto:${ADMIN_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    
-    // Open email client
+    const mailtoLink = `mailto:adityakumar2482@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(mailtoLink);
-
-    // Also send confirmation email to user
-    const confirmationSubject = 'Thank you for contacting DigitalCraft';
-    const confirmationBody = `
-Dear ${formData.name},
-
-Thank you for reaching out to DigitalCraft! We have received your inquiry and will get back to you within 24 hours.
-
-Your submission details:
-- Service: ${formData.service}
-- Budget: ${formData.budget || 'To be discussed'}
-
-We're excited to discuss how we can help bring your vision to life.
-
-Best regards,
-The DigitalCraft Team
-    `.trim();
-
-    const confirmationLink = `mailto:${formData.email}?subject=${encodeURIComponent(confirmationSubject)}&body=${encodeURIComponent(confirmationBody)}`;
     
-    // Small delay before opening confirmation email
-    setTimeout(() => {
-      window.open(confirmationLink);
-    }, 1000);
-
+    showNotification('Opening email client as fallback. Please send the email manually.', 'warning');
     return true;
-  } catch (error) {
-    console.error('Error sending contact form:', error);
-    return false;
   }
 };
 
 /**
- * Schedules a meeting and sends calendar invite
+ * Schedules a meeting via Supabase Edge Function
  */
 export const scheduleMeeting = async (meetingData: MeetingRequest): Promise<boolean> => {
   try {
-    // Parse date and time
-    const meetingDateTime = new Date(`${meetingData.date}T${meetingData.time}`);
-    const endDateTime = new Date(meetingDateTime.getTime() + 60 * 60 * 1000); // 1 hour meeting
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        type: 'meeting',
+        data: meetingData
+      })
+    });
 
-    // Format dates for calendar
-    const startDate = meetingDateTime.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    const endDate = endDateTime.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to schedule meeting');
+    }
 
-    // Create calendar event details
-    const eventTitle = `DigitalCraft Consultation - ${meetingData.name}`;
-    const eventDescription = `
-Consultation meeting with ${meetingData.name} from ${meetingData.email}
-
-${meetingData.message ? `Message: ${meetingData.message}` : ''}
-
-Meeting scheduled via DigitalCraft website.
-    `.trim();
-
-    // Create Google Calendar link
-    const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&dates=${startDate}/${endDate}&details=${encodeURIComponent(eventDescription)}&location=Online%20Meeting&add=${encodeURIComponent(ADMIN_EMAIL)}&add=${encodeURIComponent(meetingData.email)}`;
-
-    // Open calendar to create event
-    window.open(calendarUrl, '_blank');
-
-    // Send email notification to admin
-    const adminSubject = `New Meeting Scheduled - ${meetingData.name}`;
-    const adminBody = `
-New meeting has been scheduled:
-
-Client: ${meetingData.name}
-Email: ${meetingData.email}
-Date: ${meetingData.date}
-Time: ${meetingData.time} (${meetingData.timezone})
-
-Message: ${meetingData.message || 'No additional message'}
-
-Please check your calendar for the meeting invite.
-
----
-Scheduled at: ${new Date().toLocaleString()}
-    `.trim();
-
-    const adminMailto = `mailto:${ADMIN_EMAIL}?subject=${encodeURIComponent(adminSubject)}&body=${encodeURIComponent(adminBody)}`;
+    const result = await response.json();
+    console.log('Meeting scheduled successfully:', result);
     
-    // Small delay before opening admin email
-    setTimeout(() => {
-      window.open(adminMailto);
-    }, 1500);
-
-    // Send confirmation email to client
-    const clientSubject = 'Meeting Scheduled - DigitalCraft Consultation';
-    const clientBody = `
-Dear ${meetingData.name},
-
-Your consultation meeting with DigitalCraft has been scheduled!
-
-Meeting Details:
-- Date: ${new Date(meetingData.date).toLocaleDateString()}
-- Time: ${meetingData.time} (${meetingData.timezone})
-- Duration: 1 hour
-- Type: Online consultation
-
-You should receive a calendar invite shortly. We'll send you the meeting link 24 hours before the scheduled time.
-
-We're looking forward to discussing your project and how we can help bring your vision to life!
-
-Best regards,
-The DigitalCraft Team
-
----
-If you need to reschedule, please reply to this email.
-    `.trim();
-
-    const clientMailto = `mailto:${meetingData.email}?subject=${encodeURIComponent(clientSubject)}&body=${encodeURIComponent(clientBody)}`;
+    showNotification('Meeting scheduled successfully! You\'ll receive calendar invites shortly.', 'success');
     
-    // Send client confirmation
-    setTimeout(() => {
-      window.open(clientMailto);
-    }, 2000);
-
     return true;
   } catch (error) {
     console.error('Error scheduling meeting:', error);
-    return false;
+    
+    // Fallback to Google Calendar
+    const meetingDateTime = new Date(`${meetingData.date}T${meetingData.time}`);
+    const endDateTime = new Date(meetingDateTime.getTime() + 60 * 60 * 1000);
+    
+    const startDate = meetingDateTime.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    const endDate = endDateTime.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    
+    const eventTitle = `DigitalCraft Consultation - ${meetingData.name}`;
+    const eventDescription = `
+Consultation meeting with ${meetingData.name}
+Email: ${meetingData.email}
+${meetingData.message ? `Message: ${meetingData.message}` : ''}
+    `.trim();
+
+    const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&dates=${startDate}/${endDate}&details=${encodeURIComponent(eventDescription)}&location=Online%20Meeting`;
+    
+    window.open(calendarUrl, '_blank');
+    
+    showNotification('Opening Google Calendar as fallback. Please save the event manually.', 'warning');
+    return true;
   }
+};
+
+/**
+ * Shows a notification to the user
+ */
+const showNotification = (message: string, type: 'success' | 'error' | 'warning' = 'success') => {
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm transition-all duration-300 transform translate-x-full`;
+  
+  // Set colors based on type
+  const colors = {
+    success: 'bg-green-500 text-white',
+    error: 'bg-red-500 text-white',
+    warning: 'bg-yellow-500 text-black'
+  };
+  
+  notification.className += ` ${colors[type]}`;
+  notification.textContent = message;
+  
+  // Add to DOM
+  document.body.appendChild(notification);
+  
+  // Animate in
+  setTimeout(() => {
+    notification.classList.remove('translate-x-full');
+  }, 100);
+  
+  // Remove after 5 seconds
+  setTimeout(() => {
+    notification.classList.add('translate-x-full');
+    setTimeout(() => {
+      document.body.removeChild(notification);
+    }, 300);
+  }, 5000);
 };
 
 /**
