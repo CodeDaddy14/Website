@@ -1,17 +1,19 @@
 /**
- * Header Component
- * Main navigation header with responsive design and scroll effects
+ * Enhanced Header Component with Time-Based Theming
+ * Main navigation header with adaptive colors
  */
 
 import React, { useState } from 'react';
 import { Menu, X, Sparkles } from 'lucide-react';
 import { useScrolled } from '../../hooks/useScrollEffect';
+import { useTimeBasedTheme } from '../../hooks/useTimeBasedTheme';
 import { handleNavClick } from '../../utils/scrollUtils';
 import { NAV_ITEMS } from '../../constants';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isScrolled = useScrolled(50);
+  const theme = useTimeBasedTheme();
 
   /**
    * Handles mobile menu item clicks
@@ -33,9 +35,18 @@ const Header: React.FC = () => {
         <div className="flex justify-between items-center py-4">
           {/* Logo Section */}
           <div className="flex items-center">
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center mr-3 ${
-              isScrolled ? 'bg-gradient-to-r from-blue-600 to-emerald-600' : 'bg-white/20 backdrop-blur-sm'
-            }`}>
+            <div 
+              className={`w-10 h-10 rounded-lg flex items-center justify-center mr-3 ${
+                isScrolled 
+                  ? '' 
+                  : 'backdrop-blur-sm'
+              }`}
+              style={{
+                background: isScrolled 
+                  ? `linear-gradient(to right, ${theme.primary}, ${theme.secondary})`
+                  : `${theme.primary}33`
+              }}
+            >
               <Sparkles className={`w-6 h-6 ${isScrolled ? 'text-white' : 'text-white'}`} />
             </div>
             <span className={`text-xl font-bold ${
@@ -51,9 +62,26 @@ const Header: React.FC = () => {
               <button
                 key={item.name}
                 onClick={() => handleNavClick(item.href)}
-                className={`font-medium transition-colors duration-300 hover:text-blue-600 ${
-                  isScrolled ? 'text-slate-700' : 'text-white/90 hover:text-white'
+                className={`font-medium transition-colors duration-300 ${
+                  isScrolled 
+                    ? 'text-slate-700 hover:text-blue-600' 
+                    : 'text-white/90 hover:text-white'
                 }`}
+                style={{
+                  color: isScrolled 
+                    ? undefined 
+                    : item.name === 'Home' ? theme.primary : undefined
+                }}
+                onMouseEnter={(e) => {
+                  if (!isScrolled) {
+                    e.currentTarget.style.color = theme.primary;
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isScrolled) {
+                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)';
+                  }
+                }}
               >
                 {item.name}
               </button>
@@ -66,9 +94,17 @@ const Header: React.FC = () => {
               onClick={() => handleNavClick('#contact')}
               className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 ${
                 isScrolled 
-                  ? 'bg-gradient-to-r from-blue-600 to-emerald-600 text-white hover:shadow-lg hover:shadow-blue-500/25' 
-                  : 'bg-white text-slate-900 hover:shadow-lg hover:shadow-white/25'
+                  ? 'text-white hover:shadow-lg' 
+                  : 'text-slate-900 hover:shadow-lg'
               }`}
+              style={{
+                background: isScrolled 
+                  ? `linear-gradient(to right, ${theme.primary}, ${theme.secondary})`
+                  : 'white',
+                boxShadow: isScrolled 
+                  ? `0 4px 15px ${theme.primary}40`
+                  : '0 4px 15px rgba(255,255,255,0.25)'
+              }}
             >
               Get Started
             </button>
@@ -93,7 +129,16 @@ const Header: React.FC = () => {
                 <button
                   key={item.name}
                   onClick={() => handleMobileNavClick(item.href)}
-                  className="block w-full text-left px-4 py-3 text-slate-700 hover:bg-gray-50 hover:text-blue-600 transition-colors duration-300"
+                  className="block w-full text-left px-4 py-3 text-slate-700 hover:bg-gray-50 transition-colors duration-300"
+                  style={{
+                    color: item.name === 'Home' ? theme.primary : undefined
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = theme.primary;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#334155';
+                  }}
                 >
                   {item.name}
                 </button>
@@ -101,7 +146,10 @@ const Header: React.FC = () => {
               <div className="px-4 py-3">
                 <button 
                   onClick={() => handleMobileNavClick('#contact')}
-                  className="w-full bg-gradient-to-r from-blue-600 to-emerald-600 text-white font-semibold py-3 px-6 rounded-full hover:shadow-lg transition-all duration-300"
+                  className="w-full text-white font-semibold py-3 px-6 rounded-full hover:shadow-lg transition-all duration-300"
+                  style={{
+                    background: `linear-gradient(to right, ${theme.primary}, ${theme.secondary})`
+                  }}
                 >
                   Get Started
                 </button>

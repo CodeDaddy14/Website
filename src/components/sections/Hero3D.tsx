@@ -1,6 +1,6 @@
 /**
- * Hero3D Component
- * Main hero section with 3D elements and floating e-commerce logos
+ * Enhanced Hero3D Component with Time-Based Theming
+ * Main hero section with 3D elements and adaptive colors
  */
 
 import React, { useRef, useMemo } from 'react';
@@ -9,6 +9,7 @@ import { Float, Sphere, MeshDistortMaterial, Environment, OrbitControls } from '
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles, Code, Palette, Brain } from 'lucide-react';
 import { handleNavClick } from '../../utils/scrollUtils';
+import { useTimeBasedTheme } from '../../hooks/useTimeBasedTheme';
 import FloatingLogos from '../ui/FloatingLogos';
 import * as THREE from 'three';
 
@@ -39,7 +40,7 @@ const FloatingGeometry: React.FC<{ position: [number, number, number]; color: st
 /**
  * Animated Sphere Component
  */
-const AnimatedSphere: React.FC = () => {
+const AnimatedSphere: React.FC<{ color: string }> = ({ color }) => {
   const sphereRef = useRef<THREE.Mesh>(null);
   
   useFrame((state) => {
@@ -52,7 +53,7 @@ const AnimatedSphere: React.FC = () => {
   return (
     <Sphere ref={sphereRef} args={[1, 100, 200]} scale={2}>
       <MeshDistortMaterial
-        color="#4F46E5"
+        color={color}
         attach="material"
         distort={0.3}
         speed={1.5}
@@ -67,7 +68,7 @@ const AnimatedSphere: React.FC = () => {
 /**
  * Particle Field Component
  */
-const ParticleField: React.FC = () => {
+const ParticleField: React.FC<{ color: string }> = ({ color }) => {
   const points = useRef<THREE.Points>(null);
   
   const particlesPosition = useMemo(() => {
@@ -97,7 +98,7 @@ const ParticleField: React.FC = () => {
           itemSize={3}
         />
       </bufferGeometry>
-      <pointsMaterial size={0.015} color="#60A5FA" transparent opacity={0.6} />
+      <pointsMaterial size={0.015} color={color} transparent opacity={0.6} />
     </points>
   );
 };
@@ -106,22 +107,27 @@ const ParticleField: React.FC = () => {
  * Main Hero3D Component
  */
 const Hero3D: React.FC = () => {
+  const theme = useTimeBasedTheme();
+
   return (
-    <section id="home" className="relative min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 overflow-hidden">
+    <section 
+      id="home" 
+      className={`relative min-h-screen bg-gradient-to-br ${theme.heroGradient} overflow-hidden`}
+    >
       {/* 3D Canvas Background */}
       <div className="absolute inset-0">
         <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} />
-          <Environment preset="night" />
+          <Environment preset={theme.name === 'night' ? 'night' : 'sunset'} />
           
-          <ParticleField />
-          <AnimatedSphere />
+          <ParticleField color={theme.secondary} />
+          <AnimatedSphere color={theme.primary} />
           
-          <FloatingGeometry position={[-3, 2, -2]} color="#10B981" />
-          <FloatingGeometry position={[3, -1, -1]} color="#F59E0B" />
-          <FloatingGeometry position={[-2, -2, 1]} color="#EF4444" />
-          <FloatingGeometry position={[2, 2, 0]} color="#8B5CF6" />
+          <FloatingGeometry position={[-3, 2, -2]} color={theme.primary} />
+          <FloatingGeometry position={[3, -1, -1]} color={theme.secondary} />
+          <FloatingGeometry position={[-2, -2, 1]} color={theme.accent} />
+          <FloatingGeometry position={[2, 2, 0]} color={theme.primary} />
           
           <OrbitControls enableZoom={false} enablePan={false} enableRotate={true} autoRotate autoRotateSpeed={0.5} />
         </Canvas>
@@ -143,8 +149,14 @@ const Hero3D: React.FC = () => {
           ease: "easeInOut"
         }}
       >
-        <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-blue-400/30 hover:scale-110 transition-transform cursor-pointer">
-          <Code className="w-8 h-8 text-blue-400" />
+        <div 
+          className="w-16 h-16 rounded-full flex items-center justify-center backdrop-blur-sm border border-opacity-30 hover:scale-110 transition-transform cursor-pointer"
+          style={{ 
+            backgroundColor: `${theme.primary}33`,
+            borderColor: theme.primary
+          }}
+        >
+          <Code className="w-8 h-8" style={{ color: theme.primary }} />
         </div>
       </motion.div>
 
@@ -161,8 +173,14 @@ const Hero3D: React.FC = () => {
           delay: 1
         }}
       >
-        <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-emerald-400/30 hover:scale-110 transition-transform cursor-pointer">
-          <Palette className="w-6 h-6 text-emerald-400" />
+        <div 
+          className="w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-sm border border-opacity-30 hover:scale-110 transition-transform cursor-pointer"
+          style={{ 
+            backgroundColor: `${theme.secondary}33`,
+            borderColor: theme.secondary
+          }}
+        >
+          <Palette className="w-6 h-6" style={{ color: theme.secondary }} />
         </div>
       </motion.div>
 
@@ -179,27 +197,39 @@ const Hero3D: React.FC = () => {
           delay: 2
         }}
       >
-        <div className="w-14 h-14 bg-purple-500/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-purple-400/30 hover:scale-110 transition-transform cursor-pointer">
-          <Brain className="w-7 h-7 text-purple-400" />
+        <div 
+          className="w-14 h-14 rounded-full flex items-center justify-center backdrop-blur-sm border border-opacity-30 hover:scale-110 transition-transform cursor-pointer"
+          style={{ 
+            backgroundColor: `${theme.accent}33`,
+            borderColor: theme.accent
+          }}
+        >
+          <Brain className="w-7 h-7" style={{ color: theme.accent }} />
         </div>
       </motion.div>
 
       {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center">
-          {/* Animated Badge */}
+          {/* Time-based Theme Indicator */}
           <motion.div 
-            className="inline-flex items-center px-6 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 backdrop-blur-sm mb-8"
+            className="inline-flex items-center px-6 py-2 rounded-full backdrop-blur-sm mb-8 border"
+            style={{ 
+              backgroundColor: `${theme.primary}20`,
+              borderColor: `${theme.primary}40`
+            }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             whileHover={{ scale: 1.05 }}
           >
-            <Sparkles className="w-4 h-4 text-blue-400 mr-2" />
-            <span className="text-blue-300 text-sm font-medium">Digital Innovation Studio</span>
+            <Sparkles className="w-4 h-4 mr-2" style={{ color: theme.primary }} />
+            <span className="text-sm font-medium" style={{ color: theme.primary }}>
+              Digital Innovation Studio • {theme.name.charAt(0).toUpperCase() + theme.name.slice(1)} Theme
+            </span>
           </motion.div>
 
-          {/* Main Heading with 3D Text Effect */}
+          {/* Main Heading with Dynamic Colors */}
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
@@ -214,7 +244,10 @@ const Hero3D: React.FC = () => {
                 We Create
               </motion.span>
               <motion.span 
-                className="block bg-gradient-to-r from-blue-400 via-emerald-400 to-purple-400 bg-clip-text text-transparent"
+                className="block bg-clip-text text-transparent"
+                style={{
+                  backgroundImage: `linear-gradient(to right, ${theme.primary}, ${theme.secondary}, ${theme.accent})`
+                }}
                 animate={{ 
                   backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
                 }}
@@ -222,9 +255,6 @@ const Hero3D: React.FC = () => {
                   duration: 3,
                   repeat: Infinity,
                   ease: "linear"
-                }}
-                style={{
-                  backgroundSize: "200% 200%"
                 }}
                 whileHover={{ scale: 1.1 }}
               >
@@ -244,7 +274,7 @@ const Hero3D: React.FC = () => {
             full-stack development, and cutting-edge AI solutions
           </motion.p>
 
-          {/* Interactive CTA Buttons */}
+          {/* Interactive CTA Buttons with Theme Colors */}
           <motion.div 
             className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16"
             initial={{ opacity: 0, y: 30 }}
@@ -253,30 +283,28 @@ const Hero3D: React.FC = () => {
           >
             <motion.button 
               onClick={() => handleNavClick('#portfolio')}
-              className="group inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-emerald-600 text-white font-semibold rounded-full relative overflow-hidden"
+              className="group inline-flex items-center px-8 py-4 text-white font-semibold rounded-full relative overflow-hidden"
+              style={{
+                background: `linear-gradient(to right, ${theme.primary}, ${theme.secondary})`
+              }}
               whileHover={{ 
                 scale: 1.05,
-                boxShadow: "0 20px 40px rgba(59, 130, 246, 0.3)"
+                boxShadow: `0 20px 40px ${theme.primary}50`
               }}
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-blue-600"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: "0%" }}
-                transition={{ duration: 0.3 }}
-              />
               <span className="relative z-10">View Our Work</span>
               <ArrowRight className="ml-2 w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
             </motion.button>
             
             <motion.button 
               onClick={() => handleNavClick('#about')}
-              className="inline-flex items-center px-8 py-4 border-2 border-white/20 text-white font-semibold rounded-full backdrop-blur-sm relative overflow-hidden"
+              className="inline-flex items-center px-8 py-4 border-2 text-white font-semibold rounded-full backdrop-blur-sm relative overflow-hidden"
+              style={{ borderColor: `${theme.primary}60` }}
               whileHover={{ 
                 scale: 1.05,
-                backgroundColor: "rgba(255, 255, 255, 0.1)"
+                backgroundColor: `${theme.primary}20`
               }}
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 300 }}
@@ -285,7 +313,7 @@ const Hero3D: React.FC = () => {
             </motion.button>
           </motion.div>
 
-          {/* Animated Stats */}
+          {/* Animated Stats with Theme Colors */}
           <motion.div 
             className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto"
             initial={{ opacity: 0, y: 40 }}
@@ -308,9 +336,9 @@ const Hero3D: React.FC = () => {
                   className="text-3xl md:text-4xl font-bold text-white mb-2"
                   animate={{ 
                     textShadow: [
-                      "0 0 0px rgba(59, 130, 246, 0)",
-                      "0 0 20px rgba(59, 130, 246, 0.5)",
-                      "0 0 0px rgba(59, 130, 246, 0)"
+                      `0 0 0px ${theme.primary}00`,
+                      `0 0 20px ${theme.primary}80`,
+                      `0 0 0px ${theme.primary}00`
                     ]
                   }}
                   transition={{ 
@@ -321,7 +349,12 @@ const Hero3D: React.FC = () => {
                 >
                   {stat.number}
                 </motion.div>
-                <div className="text-slate-400 group-hover:text-blue-300 transition-colors">
+                <div 
+                  className="text-slate-400 transition-colors"
+                  style={{ 
+                    color: theme.name === 'night' ? '#94A3B8' : '#64748B'
+                  }}
+                >
                   {stat.label}
                 </div>
               </motion.div>
@@ -338,9 +371,13 @@ const Hero3D: React.FC = () => {
         whileHover={{ scale: 1.2 }}
         onClick={() => handleNavClick('#services')}
       >
-        <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center relative overflow-hidden">
+        <div 
+          className="w-6 h-10 border-2 rounded-full flex justify-center relative overflow-hidden"
+          style={{ borderColor: `${theme.primary}60` }}
+        >
           <motion.div 
-            className="w-1 h-3 bg-white/50 rounded-full mt-2"
+            className="w-1 h-3 rounded-full mt-2"
+            style={{ backgroundColor: `${theme.primary}80` }}
             animate={{ 
               y: [0, 16, 0],
               opacity: [1, 0, 1]
@@ -356,11 +393,15 @@ const Hero3D: React.FC = () => {
 
       {/* Interactive Cursor Trail Effect */}
       <div className="pointer-events-none fixed inset-0 z-30">
-        <div className="absolute w-4 h-4 bg-blue-400 rounded-full opacity-50 animate-ping" style={{ 
-          left: 'var(--mouse-x, 50%)', 
-          top: 'var(--mouse-y, 50%)',
-          transform: 'translate(-50%, -50%)'
-        }} />
+        <div 
+          className="absolute w-4 h-4 rounded-full opacity-50 animate-ping" 
+          style={{ 
+            backgroundColor: theme.primary,
+            left: 'var(--mouse-x, 50%)', 
+            top: 'var(--mouse-y, 50%)',
+            transform: 'translate(-50%, -50%)'
+          }} 
+        />
       </div>
     </section>
   );
